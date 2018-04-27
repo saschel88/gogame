@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
-type interfaceToFigurs interface {
+type Pointer interface {
 	 Create (n,x,y,typeFiguri int, name string) error
 	 //Delete () error
 	 //Move () error
@@ -77,9 +77,9 @@ return nil
 	}
 }*/
 func main()  {
-	pole:=[20][20]int{} //Наше поле
+	/*pole:=[20][20]int{} //Наше поле
 	pole[1][4]=1
-	newKvadrat:=new(kvadrat)	//Инициализация указателя на Структуру квадрата с дфркой
+	newKvadrat:=new(kvadrat)	//Инициализация указателя на Структуру квадрата с дыркой
 	newKvadrat.Pole=&pole  //передача алреса Нашего поля в объект структуры квадрат с дыркой
 
 	err:=newKvadrat.Create(5,1,1, 2,"name")
@@ -89,7 +89,18 @@ func main()  {
 
 	for _,v :=range pole{	//ВЫвод НАшего поля на экран
 		fmt.Println(v)
-	}
+	}*/
+
+	n:=10
+	array:=make([][]int,n)
+	arrayOfKoordinat:=[2]int{}
+	array[0]=append(array[0],arrayOfKoordinat[0],arrayOfKoordinat[1])
+
+	fmt.Println(array[0][1])
+	/*for _,v:=range array {
+		v=append(v,arrayOfKoordinat)
+		fmt.Println(array)
+	}*/
 
 }
 
