@@ -1,27 +1,30 @@
-
 // Опиание структур используемых фигур и интерфейса, реализуемого данными структурами
 package figures
 
 import (
-
 	"errors"
-
+	"fmt"
 )
-const RazmernostPole = 50
+
+const RazmernostPole = 20 //размерность отображаемого поля
+// Интерфейс рописывающий дефтельность фигур на поле
 type Painter interface {
-	Create(coordinateX, coordinateY, cellCount int, isCreate bool) error
-	//Delete () error
+	// Координаты имеют вид array[X][Y]
+	//coordinateX - координата по X
+	//coordinateY - координата по Y
+	Create(coordinateX, coordinateY int) error
+	// Метод удаления. Возвращаему ошибку взять на контроль (нужна ли она)
+	Delete () error
 	//Move () error
 	// TakeKoordinate ()error
-	//testToCreate () error // Возможно стоит добавить в Crete
-	//testToMove () error // Возможно стоит добавить в Move
+
 }
 
 // Описание фигуры Квадрат с дырой
 type Square struct {
 	Name        string
 	Pole        *[RazmernostPole][RazmernostPole]int
-	Coordinates [][]int
+	Coordinates [][2]int
 	SideSquare  int //Значение стороны квадрата. Получаем при создании
 
 }
@@ -30,7 +33,7 @@ type Square struct {
 type Rectangle struct {
 	Name        string
 	Pole        *[RazmernostPole][RazmernostPole]int
-	Coordinates [][]int
+	Coordinates [][2]int
 	Height      int //Значение ширины прямоугольника. Получаем при создании
 	Width       int //Значение высоты прямоугольника. Получаем при создании
 }
@@ -39,48 +42,80 @@ type Rectangle struct {
 type Snake struct {
 	Name        string
 	Pole        *[RazmernostPole][RazmernostPole]int
-	Coordinates [][]int //Значение стороны квадрата. Получаем при создании
+	Coordinates [][2]int //Значение стороны квадрата. Получаем при создании
 	SnakeLength int
 }
 
 //Метод создания фигуры квадрат с дыркой
-func (s *Square) Create(coordinateX, coordinateY, cellCount int, isCreate bool) error {
+func (s *Square) Create(coordinateX, coordinateY int) error {
 	tempPole := *s.Pole // Получение слепка Поля
-	if isCreate {
-		return nil //Дествия при движении
-	} else {
-		cellCountInArray := s.SideSquare*4 - 4   //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
-		array := make([][]int, cellCountInArray) // Инициализация двумерного массива координат
-		arrayOfKoordinat := make([]int,2)
-		for _, v := range array { //Заполнение дефолтными значениями двумерного массива
-			v = append(v, arrayOfKoordinat[0], arrayOfKoordinat[1])
-
-		}
-
+			cellCountInArray := s.SideSquare*4 - 4    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
+		array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
 		s.Coordinates = array //Заполнение поля структуры инициализированным массивом координат
 
 		topLine := s.SideSquare + coordinateY     //Получаем длину верхней грани
 		lateralLine := s.SideSquare + coordinateX //Получаем длину боковой грани
-		//Проверка на наличе препядствий на поле, мешающих построить квадрат
+		// Проверка на наличие препядствий, мешающих построить квадрат , рисование квадрата с дыркой на Поле и запись координат в контейнер координат
+		inbexCoordinateArray := 0 //Идекс в массиве координат
 		for i := coordinateX; i < lateralLine; i++ {
 			for j := coordinateY; j < topLine; j++ {
-				if s.Pole[i][j] != 0 {
+				if tempPole[i][j] != 0 {
 					return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
+				}
+				if i == coordinateX || i == lateralLine-1 || j == coordinateY || j == topLine-1 {
+					tempPole[i][j] = 1
+					s.Coordinates[inbexCoordinateArray][0] = i //Заполнение значений координат Х
+					s.Coordinates[inbexCoordinateArray][1] = j //Заполнение значений координат Y
+					inbexCoordinateArray++
+
 				}
 			}
 		}
-		for i := coordinateX; i < lateralLine; i++ { //Рисуем 2 вертикальные линии
-			s.Pole[i][coordinateY] = 1
-			s.Pole[i][topLine-1] = 1
-
-		}
-		for j := coordinateY + 1; j < topLine-1; j++ { //Рисуем 2 горизонтальные линии
-			s.Pole[coordinateX][j] = 1
-			s.Pole[lateralLine-1][j] = 1
-		}
-		s.Pole = &tempPole
+		fmt.Println(s.Coordinates)
+		*s.Pole = tempPole
 		return nil
-	}
-
 }
 
+
+// Удаление имеющегося квадрата с дыркой
+func (s *Square) Delete() error {
+	tempPole := *s.Pole // Получение слепка Поля
+	for _,v :=range s.Coordinates{ //Производим замену по координатам.
+		tempPole[v[0]][v[1]]=0
+	}
+	*s.Pole = tempPole
+	return nil
+}
+
+//Метод создания фигуры прямоугольник
+func (r *Rectangle) Create(coordinateX, coordinateY int) error {
+	tempPole := *r.Pole // Получение слепка Поля
+	cellCountInArray := r.Width*r.Height    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
+	array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
+	for _, v := range array {                 //Заполнение дефолтными значениями двумерного массива
+		v[0] = 0
+		v[1] = 0
+
+	}
+	r.Coordinates = array //Заполнение поля структуры инициализированным массивом координат
+	topLine := r.Height + coordinateX     //Получаем длину верхней грани
+	lateralLine := r.Width + coordinateY //Получаем длину боковой грани
+	// Проверка на наличие препядствий, мешающих построить квадрат , рисование квадрата с дыркой на Поле и запись координат в контейнер координат
+	inbexCoordinateArray := 0 //Идекс в массиве координат
+	for i := coordinateX; i < lateralLine; i++ {
+		for j := coordinateY; j < topLine; j++ {
+			if tempPole[i][j] != 0 {
+				return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
+			}
+				tempPole[i][j] = 1
+				r.Coordinates[inbexCoordinateArray][0] = i //Заполнение значений координат Х
+				r.Coordinates[inbexCoordinateArray][1] = j //Заполнение значений координат Y
+				inbexCoordinateArray++
+
+
+		}
+	}
+	fmt.Println(r.Coordinates)
+	*r.Pole = tempPole
+	return nil
+}
