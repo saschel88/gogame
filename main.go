@@ -113,11 +113,5 @@ func main() {
 		}
 
 	}
-	/*n:=10
-	array:=make([][]int,n)
-	arrayOfKoordinat:=[2]int{}
-	array[0]=append(array[0],arrayOfKoordinat[0],arrayOfKoordinat[1])
-
-	fmt.Println(array[0][1])*/
 
 }
