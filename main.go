@@ -12,20 +12,23 @@ func main() {
 	//имитация значений полученных от пользователя
 	//sideTop:=4
 	//pole[5][8]=1
-	x := 2
-	y := 4
+	x := 5
+	y := 3
 	sideSquare := 4
 	sideWidht := 3
 	sideHeight := 4
 	lenightSnake:=5
+	goTo:=1
+	howFarCount:=3
 	name := "Square1"
 	name2 := "Rectangle1"
+	name3 := "Snake1"
 	mapStructName := make(map[string]figures.Painter) //карта
 
 	//Типы фигуо: 1-Квадрат с дыркой
 	//			  2-Прямоугольник
 	//			  3-Змейка
-	figureType := 1
+	figureType := 3
 
 	if _, ok := mapStructName[name2]; ok {
 		// Тут описывается движение фогуры
@@ -51,7 +54,7 @@ func main() {
 				}
 
 				//Move()
-				err=newKvadrat.Move(3,2)
+				err=newKvadrat.Move(goTo,howFarCount)
 				if err!=nil {
 					fmt.Println(err)
 				}
@@ -59,7 +62,8 @@ func main() {
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}
-				err=newKvadrat.Delete()
+
+				err=mapStructName[name].Delete()
 				if err != nil {
 					fmt.Println(err)
 				} else {
@@ -82,6 +86,17 @@ func main() {
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}
+
+				//Move()
+				err=mapStructName[newRectangle.Name].Move(goTo,howFarCount)
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Println("************************************************")
+				for _, v := range pole { //Вывод Нашего поля на экран
+					fmt.Println(v)
+				}
+					fmt.Println("************************************************")
 				err = newRectangle.Delete()
 				if err != nil {
 					fmt.Println(err)
@@ -94,7 +109,7 @@ func main() {
 				fmt.Println(3)
 				newSnake := new(figures.Snake) //Инициализация указателя на Структуру квадрата с дыркой
 				newSnake.Pole = &pole              //передача адреса Нашего поля в объект структуры квадрат с дыркой
-				newSnake.Name = name2
+				newSnake.Name = name3
 				newSnake.SnakeLength = lenightSnake
 
 
@@ -107,14 +122,24 @@ func main() {
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}
-				err = newSnake.Delete()
+
+				fmt.Println("*************************************")
+				err=newSnake.Move(goTo,howFarCount)
+				if err != nil {
+					fmt.Println(err)
+				}
+				for _, v := range pole { //Вывод Нашего поля на экран
+					fmt.Println(v)
+				}
+				fmt.Println("********************************************")
+				err = mapStructName[name3].Delete()
 				if err != nil {
 					fmt.Println(err)
 				} else {
 					delete(mapStructName, newSnake.Name)
 				}
 				fmt.Println("**********************************************")
-				// Для прямоугольника
+
 			}
 
 		}

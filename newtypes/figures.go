@@ -4,9 +4,11 @@ package figures
 import (
 	"errors"
 	"container/list"
+	"fmt"
+	"github.com/astaxie/beego/logs"
 )
 
-const RazmernostPole = 20 //размерность отображаемого поля
+const RazmernostPole = 10 //размерность отображаемого поля
 // Интерфейс рописывающий дефтельность фигур на поле
 type Painter interface {
 	// Координаты имеют вид array[X][Y]
@@ -264,6 +266,7 @@ func (s *Snake) Create(coordinateX, coordinateY int) error {
 
 	*s.Pole = tempPole
 	s.Coordinates=*snakeList
+
 	return nil
 }
 
@@ -278,7 +281,9 @@ func (s *Snake) Delete() error {
 
 	}
 
+
 	*s.Pole = tempPole //Слепок становится полем
+
 	return nil
 }
 
@@ -290,48 +295,50 @@ func (s *Snake) Delete() error {
 func (s *Snake) Move(goTo, howFarToGo int) error {
 	tempPole:=*s.Pole //Слепок Поля
 	snakeList:=s.Coordinates //Слепок списка координат
-	ferstElementInSnakeList:=snakeList.Front().Value.([2]int) //получаем первый элемент списка и приводим к нужному типу
-	coordinateX:=ferstElementInSnakeList[0]
-	coordinateY:=ferstElementInSnakeList[1]
-	tempArreyFrst:=[2]int{}
-	tempArreyLast:=[2]int{}
+	firstElementInSnakeList:=snakeList.Front().Value.([2]int) //получаем первый элемент списка и приводим к нужному типу
+	coordinateX:=firstElementInSnakeList[0]
+	coordinateY:=firstElementInSnakeList[1]
+
+	tempArrayFirst:=[2]int{}
+	tempArrayLast:=[2]int{}
 	switch goTo {
 	case 1: //Вверх
 		if coordinateX-howFarToGo<0 {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateX;i>coordinateX-howFarToGo ;i--  {// Проверка на препятствие
+		for i:=coordinateX-1;i>coordinateX-howFarToGo-1 ;i--  {// Проверка на препятствие
 			if tempPole[i][coordinateY] !=0{
-				return errors.New("На пути следования возникало препятствие.")
+				return errors.New("На пути следования возникало препятствие!")
 			}
 			tempPole[i][coordinateY] =1
-			tempArreyFrst[0]=i			//Получаем координаты x
-			tempArreyFrst[1]=coordinateY //Получаем координаты y
-			tempArreyLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
-			tempPole[tempArreyLast[0]][tempArreyLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
-			snakeList.PushFront(tempArreyFrst)
+			tempArrayFirst[0]=i			//Получаем координаты x
+			tempArrayFirst[1]=coordinateY //Получаем координаты y
+			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int)//Берем последний элемент списк
+			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
+			logs.Warning(tempArrayLast)
+			snakeList.PushFront(tempArrayFirst)
 
 		}
-		s.Pole=&tempPole
+		*s.Pole=tempPole
 		s.Coordinates=snakeList
 		return nil
 	case 2: //Вниз
 		if coordinateX+howFarToGo>RazmernostPole {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateX;i<coordinateX+howFarToGo ;i++  {// Проверка на препятствие
+		for i:=coordinateX+1;i<coordinateX+howFarToGo ;i++  {// Проверка на препятствие
 			if tempPole[i][coordinateY] !=0{
 				return errors.New("На пути следования возникало препятствие.")
 			}
 			tempPole[i][coordinateY] =1
-			tempArreyFrst[0]=i			//Получаем координаты x
-			tempArreyFrst[1]=coordinateY //Получаем координаты y
-			tempArreyLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
-			tempPole[tempArreyLast[0]][tempArreyLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
-			snakeList.PushFront(tempArreyFrst)
+			tempArrayFirst[0]=i			//Получаем координаты x
+			tempArrayFirst[1]=coordinateY //Получаем координаты y
+			tempArrayLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
+			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
+			snakeList.PushFront(tempArrayFirst)
 
 		}
-		s.Pole=&tempPole
+		*s.Pole=tempPole
 		s.Coordinates=snakeList
 		return nil
 
@@ -339,19 +346,19 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		if coordinateY+howFarToGo>RazmernostPole {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateY;i<coordinateY+howFarToGo ;i++  {// Проверка на препятствие
+		for i:=coordinateY+1;i<coordinateY+howFarToGo ;i++  {// Проверка на препятствие
 			if tempPole[coordinateX][i] !=0{
 				return errors.New("На пути следования возникало препятствие.")
 			}
 			tempPole[coordinateX][i] =1
-			tempArreyFrst[0]=coordinateX			//Получаем координаты x
-			tempArreyFrst[1]=i //Получаем координаты y
-			tempArreyLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
-			tempPole[tempArreyLast[0]][tempArreyLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
-			snakeList.PushFront(tempArreyFrst)
+			tempArrayFirst[0]=coordinateX			//Получаем координаты x
+			tempArrayFirst[1]=i //Получаем координаты y
+			tempArrayLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
+			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
+			snakeList.PushFront(tempArrayFirst)
 
 		}
-		s.Pole=&tempPole
+		*s.Pole=tempPole
 		s.Coordinates=snakeList
 		return nil
 
@@ -359,19 +366,20 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		if coordinateY-howFarToGo<0 {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateY;i<coordinateY-howFarToGo ;i--  {// Проверка на препятствие
+		for i:=coordinateY-1;i<coordinateY-howFarToGo ;i--  {// Проверка на препятствие
 			if tempPole[coordinateX][i] !=0{
-				return errors.New("На пути следования возникало препятствие.")
+				return errors.New("На пути следования возникло препятствие.")
 			}
 			tempPole[coordinateX][i] =1
-			tempArreyFrst[0]=coordinateX			//Получаем координаты x
-			tempArreyFrst[1]=i //Получаем координаты y
-			tempArreyLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
-			tempPole[tempArreyLast[0]][tempArreyLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
-			snakeList.PushFront(tempArreyFrst)
+			tempArrayFirst[0]=coordinateX			//Получаем координаты x
+			tempArrayFirst[1]=i //Получаем координаты y
+			tempArrayLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
+			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
+			snakeList.PushFront(tempArrayFirst)
 
 		}
-		s.Pole=&tempPole
+		*s.Pole=tempPole
+		fmt.Println(s.Coordinates)
 		s.Coordinates=snakeList
 		return nil
 	default:
