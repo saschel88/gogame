@@ -1,11 +1,12 @@
 package main
 
 import (
+	"gogame/newtypes"
 	"fmt"
-	"homework/gogame/newtypes"
 )
 
 func main() {
+
 
 	pole := [figures.RazmernostPole][figures.RazmernostPole]int{} //Наше поле
 	//имитация значений полученных от пользователя
@@ -24,7 +25,7 @@ func main() {
 	//Типы фигуо: 1-Квадрат с дыркой
 	//			  2-Прямоугольник
 	//			  3-Змейка
-	figureType := 3
+	figureType := 2
 
 	if _, ok := mapStructName[name2]; ok {
 		// Тут описывается движение фогуры
@@ -113,5 +114,8 @@ func main() {
 		}
 
 	}
+
+
+
 
 }
