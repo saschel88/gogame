@@ -3,7 +3,6 @@ package figures
 
 import (
 	"errors"
-	"fmt"
 	"container/list"
 )
 
@@ -91,6 +90,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
+
 		err = s.Create(s.Coordinates[0][0]-howFarToGo, s.Coordinates[0][1])
 		if err != nil {
 			return err
@@ -165,7 +165,7 @@ func (r *Rectangle) Create(coordinateX, coordinateY int) error {
 
 		}
 	}
-	fmt.Println(r.Coordinates)
+
 	*r.Pole = tempPole
 	return nil
 }

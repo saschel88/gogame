@@ -25,7 +25,7 @@ func main() {
 	//Типы фигуо: 1-Квадрат с дыркой
 	//			  2-Прямоугольник
 	//			  3-Змейка
-	figureType := 2
+	figureType := 1
 
 	if _, ok := mapStructName[name2]; ok {
 		// Тут описывается движение фогуры
@@ -46,6 +46,16 @@ func main() {
 				}
 				mapStructName[newKvadrat.Name] = newKvadrat
 
+				for _, v := range pole { //Вывод Нашего поля на экран
+					fmt.Println(v)
+				}
+
+				//Move()
+				err=newKvadrat.Move(3,2)
+				if err!=nil {
+					fmt.Println(err)
+				}
+				fmt.Println("************************************************")
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}
