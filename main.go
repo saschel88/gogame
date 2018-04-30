@@ -3,7 +3,7 @@ package main
 import (
 
 	"fmt"
-	"homework/gogame/newtypes"
+	"gogame/newtypes"
 )
 
 func main() {
@@ -142,10 +142,10 @@ func main() {
 				}
 
 				fmt.Println("*************************************")
-				err=mapStructName[name].Move(2,5)
-				if err != nil {
-					fmt.Println(err)
-				}
+				//err=mapStructName[name].Move(2,5)
+				//if err != nil {
+				//	fmt.Println(err)
+				//}
 
 				fmt.Println("*************************************")
 				err=mapStructName[name3].Move(1,6)
@@ -161,9 +161,11 @@ func main() {
 					fmt.Println(err)
 				}
 				err=mapStructName[name3].Move(4,4)
+
 				if err != nil {
 					fmt.Println(err)
 				}
+				fmt.Println("*************************************")
 				/*for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}*/

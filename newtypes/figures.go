@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-const RazmernostPole = 50 //размерность отображаемого поля
+const RazmernostPole = 30 //размерность отображаемого поля
 // Интерфейс рописывающий дефтельность фигур на поле
 type Painter interface {
 	// Координаты имеют вид array[X][Y]
@@ -383,21 +383,32 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		return nil
 
 	case 4: //Влево
+
 		if coordinateY-howFarToGo<0 {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateY-1;i<coordinateY-howFarToGo-1 ;i--  {// Проверка на препятствие
-			if tempPole[coordinateX][i] !=0{
+
+		for i:=coordinateY-1; i > coordinateY-howFarToGo-1 ;i--  {// Проверка на препятствие
+
+
+		if tempPole[coordinateX][i]!=0 {
 				return errors.New("На пути следования возникло препятствие.")
 			}
-			tempPole[coordinateX][i] =1
-			tempArrayFirst[0]=coordinateX			//Получаем координаты x
+
+			tempPole[coordinateX][i]=1
+
+			tempArrayFirst[0]=coordinateX //Получаем координаты x
 			tempArrayFirst[1]=i //Получаем координаты y
+
 			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int) 	//Берем последний элемент списк
 			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
 			snakeList.PushFront(tempArrayFirst)
 
+
+
+
 		}
+
 		*s.Pole=tempPole
 
 		s.Coordinates=snakeList
