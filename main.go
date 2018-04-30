@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gogame/newtypes"
+
 	"fmt"
+	"homework/gogame/newtypes"
 )
 
 func main() {
@@ -18,8 +19,8 @@ func main() {
 	sideWidht := 3
 	sideHeight := 4
 	lenightSnake:=5
-	goTo:=1
-	howFarCount:=3
+	goTo:=2
+	howFarCount:=4
 	name := "Square1"
 	name2 := "Rectangle1"
 	name3 := "Snake1"
@@ -56,6 +57,9 @@ func main() {
 				//Move()
 				err=newKvadrat.Move(goTo,howFarCount)
 				if err!=nil {
+					fmt.Println(err)
+				}
+				if err= mapStructName[name].TakeKoordinate();err!=nil {
 					fmt.Println(err)
 				}
 				fmt.Println("************************************************")
@@ -96,6 +100,9 @@ func main() {
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}
+				if err= mapStructName[name2].TakeKoordinate();err!=nil {
+					fmt.Println(err)
+				}
 					fmt.Println("************************************************")
 				err = newRectangle.Delete()
 				if err != nil {
@@ -113,23 +120,55 @@ func main() {
 				newSnake.SnakeLength = lenightSnake
 
 
-				err := newSnake.Create(x, y)
+				err := newSnake.Create(10, 12)
 				if err != nil {
 					fmt.Println(err)
 				}
 				mapStructName[newSnake.Name] = newSnake
+
+				newKvadrat := new(figures.Square) //Инициализация указателя на Структуру квадрата с дыркой
+				newKvadrat.Pole = &pole           //передача адреса Нашего поля в объект структуры квадрат с дыркой
+				newKvadrat.Name = name
+				newKvadrat.SideSquare = sideSquare
+
+				err = newKvadrat.Create(1, 1)
+				if err != nil {
+					fmt.Println(err)
+				}
+				mapStructName[newKvadrat.Name] = newKvadrat
 
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
 				}
 
 				fmt.Println("*************************************")
-				err=newSnake.Move(goTo,howFarCount)
+				err=mapStructName[name].Move(2,5)
 				if err != nil {
 					fmt.Println(err)
 				}
+
+				fmt.Println("*************************************")
+				err=mapStructName[name3].Move(1,6)
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Println("*************************************")
 				for _, v := range pole { //Вывод Нашего поля на экран
 					fmt.Println(v)
+				}
+				err=mapStructName[name].Move(3,4)
+				if err != nil {
+					fmt.Println(err)
+				}
+				err=mapStructName[name3].Move(4,4)
+				if err != nil {
+					fmt.Println(err)
+				}
+				/*for _, v := range pole { //Вывод Нашего поля на экран
+					fmt.Println(v)
+				}*/
+				/*if err= mapStructName[name3].TakeKoordinate();err!=nil {
+					fmt.Println(err)
 				}
 				fmt.Println("********************************************")
 				err = mapStructName[name3].Delete()
@@ -138,7 +177,8 @@ func main() {
 				} else {
 					delete(mapStructName, newSnake.Name)
 				}
-				fmt.Println("**********************************************")
+
+				fmt.Println("**********************************************")*/
 
 			}
 

@@ -5,10 +5,9 @@ import (
 	"errors"
 	"container/list"
 	"fmt"
-	"github.com/astaxie/beego/logs"
 )
 
-const RazmernostPole = 10 //размерность отображаемого поля
+const RazmernostPole = 50 //размерность отображаемого поля
 // Интерфейс рописывающий дефтельность фигур на поле
 type Painter interface {
 	// Координаты имеют вид array[X][Y]
@@ -23,7 +22,8 @@ type Painter interface {
 	//						3: Вправо
 	//						4: Влево
 	Move(goTo, howFarToGo int) error
-	// TakeKoordinate ()error
+	//Метод получения координат
+	TakeKoordinate ()error
 
 }
 
@@ -48,6 +48,9 @@ func (s *Square) Create(coordinateX, coordinateY int) error {
 
 	topLine := s.SideSquare + coordinateY     //Получаем длину верхней грани
 	lateralLine := s.SideSquare + coordinateX //Получаем длину боковой грани
+	if topLine < 0 || lateralLine < 0 || topLine > RazmernostPole || lateralLine > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
+	}
 	// Проверка на наличие препядствий, мешающих построить квадрат , рисование квадрата с дыркой на Поле и запись координат в контейнер координат
 	inbexCoordinateArray := 0 //Идекс в массиве координат
 	for i := coordinateX; i < lateralLine; i++ {
@@ -132,7 +135,13 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		return errors.New("Указанное направление для движения отсутствует")
 	}
 }
-
+//Методы вывода координа квадраты с дыркой
+func (s *Square) TakeKoordinate () error {
+	for _,v := range s.Coordinates{
+		fmt.Println(v)
+	}
+	return nil
+}
 // Описание фигуры Прямоугольник.
 type Rectangle struct {
 	Name        string
@@ -153,6 +162,9 @@ func (r *Rectangle) Create(coordinateX, coordinateY int) error {
 	r.Coordinates = array                     //Заполнение поля структуры инициализированным массивом координат
 	topLine := r.Height + coordinateY         //Получаем длину верхней грани
 	lateralLine := r.Width + coordinateX      //Получаем длину боковой грани
+	if topLine < 0 || lateralLine < 0 || topLine > RazmernostPole || lateralLine > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
+	}
 	// Проверка на наличие препядствий, мешающих построить Прямоугольник , рисование Прямоугольника на Поле и запись координат в контейнер координат
 	inbexCoordinateArray := 0 //Идекс в массиве координат
 	for i := coordinateX; i < lateralLine; i++ {
@@ -234,12 +246,19 @@ func (r *Rectangle) Move(goTo, howFarToGo int) error {
 		return errors.New("Указанное направление для движения отсутствует")
 	}
 }
+//Методы вывода координа прямоугольника
+func (r *Rectangle) TakeKoordinate () error {
+	for _,v := range r.Coordinates{
+		fmt.Println(v)
+	}
+	return nil
+}
 
 // Описание фигуры Змейка.
 type Snake struct {
 	Name        string
 	Pole        *[RazmernostPole][RazmernostPole]int
-	Coordinates list.List //Координаты Змейки
+	Coordinates *list.List //Координаты Змейки
 	SnakeLength int
 }
 
@@ -248,7 +267,8 @@ func (s *Snake) Create(coordinateX, coordinateY int) error {
 	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
 		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
 	}
-	snakeList:=list.New() //создаем указатель на список snakeList
+	//snakeList:=list.New() //создаем указатель на список snakeList
+	snakeList:=list.List{}
 	tempPole := *s.Pole                    // Получение слепка Поля
 	//array := make([][2]int, s.SnakeLength) // Инициализация слайса  массивов координат
 	//s.Coordinates = array                  //Заполнение поля структуры инициализированным массивом координат
@@ -265,7 +285,7 @@ func (s *Snake) Create(coordinateX, coordinateY int) error {
 		}
 
 	*s.Pole = tempPole
-	s.Coordinates=*snakeList
+	s.Coordinates=&snakeList
 
 	return nil
 }
@@ -313,9 +333,9 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 			tempPole[i][coordinateY] =1
 			tempArrayFirst[0]=i			//Получаем координаты x
 			tempArrayFirst[1]=coordinateY //Получаем координаты y
-			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int)//Берем последний элемент списк
+			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int) 	//Берем последний элемент списк
 			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
-			logs.Warning(tempArrayLast)
+
 			snakeList.PushFront(tempArrayFirst)
 
 		}
@@ -326,14 +346,14 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		if coordinateX+howFarToGo>RazmernostPole {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateX+1;i<coordinateX+howFarToGo ;i++  {// Проверка на препятствие
+		for i:=coordinateX+1;i<coordinateX+howFarToGo+1 ;i++  {// Проверка на препятствие
 			if tempPole[i][coordinateY] !=0{
 				return errors.New("На пути следования возникало препятствие.")
 			}
 			tempPole[i][coordinateY] =1
 			tempArrayFirst[0]=i			//Получаем координаты x
 			tempArrayFirst[1]=coordinateY //Получаем координаты y
-			tempArrayLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
+			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int) 	//Берем последний элемент списк
 			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
 			snakeList.PushFront(tempArrayFirst)
 
@@ -346,14 +366,14 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		if coordinateY+howFarToGo>RazmernostPole {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateY+1;i<coordinateY+howFarToGo ;i++  {// Проверка на препятствие
+		for i:=coordinateY+1;i<coordinateY+howFarToGo+1 ;i++  {// Проверка на препятствие
 			if tempPole[coordinateX][i] !=0{
 				return errors.New("На пути следования возникало препятствие.")
 			}
 			tempPole[coordinateX][i] =1
 			tempArrayFirst[0]=coordinateX			//Получаем координаты x
 			tempArrayFirst[1]=i //Получаем координаты y
-			tempArrayLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
+			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int) 	//Берем последний элемент списк
 			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
 			snakeList.PushFront(tempArrayFirst)
 
@@ -366,23 +386,31 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		if coordinateY-howFarToGo<0 {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
-		for i:=coordinateY-1;i<coordinateY-howFarToGo ;i--  {// Проверка на препятствие
+		for i:=coordinateY-1;i<coordinateY-howFarToGo-1 ;i--  {// Проверка на препятствие
 			if tempPole[coordinateX][i] !=0{
 				return errors.New("На пути следования возникло препятствие.")
 			}
 			tempPole[coordinateX][i] =1
 			tempArrayFirst[0]=coordinateX			//Получаем координаты x
 			tempArrayFirst[1]=i //Получаем координаты y
-			tempArrayLast=snakeList.Back().Value.([2]int) //Берем последний элемент списк
+			tempArrayLast=snakeList.Remove(snakeList.Back()).([2]int) 	//Берем последний элемент списк
 			tempPole[tempArrayLast[0]][tempArrayLast[1]]=0 //Затираем слепок поля по координатам последнего элемента
 			snakeList.PushFront(tempArrayFirst)
 
 		}
 		*s.Pole=tempPole
-		fmt.Println(s.Coordinates)
+
 		s.Coordinates=snakeList
 		return nil
 	default:
 		return errors.New("Указанное направление для движения отсутствует")
 	}
+}
+
+//Методы вывода координа Змейки
+func (s *Snake) TakeKoordinate () error {
+	for e := s.Coordinates.Front(); e != nil; e = e.Next() {
+		fmt.Println(e.Value)
+	}
+	return nil
 }
