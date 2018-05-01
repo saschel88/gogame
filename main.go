@@ -3,24 +3,14 @@ package main
 import (
 
 	"fmt"
+	"gogame/constants"
+	)
 
-)
 
-
-const (
-	MainMenu        = "\nГлавное меню:\n 1. Вывести поле на экран.\n 2. Выбрать тип фигуры. \n 0. Выход."
-	FigureSelection = "\nВыбор типа фигруы: \n 1. Пустой квадрат.\n 2. Прямоугольник. \n 3. Змейка. \n 0. Выход в предыдущее меню."
-	EnterTheNumber  = "\nВведите число: "
-	DefaultValue    = "\nДанное значение отсутсвует! Попробуйте еще раз\n"
-	SquareMenu      = "\nПустой квадрат: \n 1. Создать. \n 2. Удалить. \n 3. Переместить \n 4. Вывод координат \n 0. Вернуться в главное меню."
-	RectangleMenu   = "\nПрямоугольник: \n 1. Создать. \n 2. Удалить. \n 3. Переместить \n 4. Вывод координат \n 0. Вернуться в главное меню."
-	SnakeMenu       = "\nЗмейка: \n 1. Создать. \n 2. Удалить. \n 3. Переместить \n 4. Вывод координат \n 0. Вернуться в главное меню."
-
-)
 
 func main() {
 
-fmt.Println(MainMenu)
+
 /*	pole := [figures.RazmernostPole][figures.RazmernostPole]int{} //Наше поле
 	//имитация значений полученных от пользователя
 	//sideTop:=4
@@ -205,28 +195,33 @@ fmt.Println(MainMenu)
 	}
 */
 
+	//Переход в Главное меню
+	GoToMainMenu := false
+	// Выход из программы
+	GoToExit := false
+	//Ответ пользователя
+	var userResponse int
+	// Цикл основной программы
+	for !GoToExit {
+		GoToExit=false
 
-
-	GoToMainMenu := false     //Переход в Главное меню
-	GoToExit := false         // Выход из программы
-	goToPreviousMenu := false //Переход к предыдущему меню
-	var userResponse int      //Ответ пользователя
-
-	for !GoToExit { // Цикл основной программы
-		fmt.Println(MainMenu)
-		fmt.Print(EnterTheNumber)
+		fmt.Println(textconstants.MainMenu)
+		fmt.Print(textconstants.EnterTheNumber)
 		fmt.Scanf("%d", &userResponse)
 
 		switch userResponse {
-		case 1: // Вывод поля
+		// Вывод поля
+		case 1:
+		//Создать фигуру
+		case 2:
 
-		case 2: //Выбор типа фигуры
 			for !GoToMainMenu {
 				GoToMainMenu = false
-				fmt.Println(FigureSelection)
-				fmt.Print(EnterTheNumber)
+				fmt.Println(textconstants.CreateFigureHeader)
+				fmt.Print(textconstants.NameFigure)
+				fmt.Print(textconstants.EnterTheNumber)
 				fmt.Scanf("%d", &userResponse)
-				switch userResponse {
+				/*switch userResponse {
 				case 1: //Пустой квадрат
 					for !goToPreviousMenu {
 						goToPreviousMenu = false
@@ -249,13 +244,29 @@ fmt.Println(MainMenu)
 				default: //Переход к меню Выбор типа фигур
 					fmt.Println(DefaultValue)
 					continue
-				}
+				}*/
 			}
+
+		case 3:
+			fmt.Println(textconstants.DeleteFigureHeader)
+			fmt.Println(textconstants.NameFigure)
+			fmt.Print(textconstants.EnterTheNumber)
+			fmt.Scanf("%d", &userResponse)
+		case 4:
+			fmt.Println(textconstants.MoveFigureHeader)
+			fmt.Println(textconstants.NameFigure)
+			fmt.Print(textconstants.EnterTheNumber)
+			fmt.Scanf("%d", &userResponse)
+		case 5:
+			fmt.Println(textconstants.TakeFigureCoordinate)
+			fmt.Println(textconstants.NameFigure)
+			fmt.Print(textconstants.EnterTheNumber)
+			fmt.Scanf("%d", &userResponse)
 		case 0:
-			fmt.Println("Сауболыныз!!!")
+			fmt.Println(textconstants.GoodBay)
 			GoToExit = true
 		default:
-			fmt.Println(DefaultValue)
+			fmt.Println(textconstants.DefaultValue)
 
 		}
 
