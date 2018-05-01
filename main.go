@@ -20,7 +20,7 @@ const (
 
 func main() {
 
-
+fmt.Println(MainMenu)
 /*	pole := [figures.RazmernostPole][figures.RazmernostPole]int{} //Наше поле
 	//имитация значений полученных от пользователя
 	//sideTop:=4
