@@ -3,8 +3,8 @@ package main
 import (
 
 	"fmt"
-	"homework/gogame/figures"
-	"homework/gogame/textconstants"
+	"gogame/figures"
+	"gogame/textconstants"
 
 )
 
@@ -213,6 +213,8 @@ func main() {
 	squareSide:=0
 	//Имя прямоугольника
 	rectangleName:=""
+	//Имя Фигуры
+	figureName:=""
 
 	//Высота прямоугольника
 	rectangleHigh:=0
@@ -225,11 +227,15 @@ func main() {
 	//Координаты
 	coordinateX:=0
 	coordinateY:=0
+	// Направление перемещения
+	goTo :=0
+	// Количество ячеек на которое необходимо перевезти фигуру
+	howFarToGo:=0
 
 	// Цикл основной программы
 	for !GoToExit {
 		GoToExit=false
-
+		GoToMainMenu = false
 		fmt.Println(textconstants.MainMenu)
 		fmt.Print(textconstants.EnterTheNumber)
 		fmt.Scanf("%d", &userResponse)
@@ -237,11 +243,12 @@ func main() {
 		switch userResponse {
 		// Вывод поля
 		case 1:
+			showPole(&pole)
 		//Создать фигуру
 		case 2:
 
 			for !GoToMainMenu {
-				GoToMainMenu = false
+
 				fmt.Println(textconstants.CreateFigureHeader)
 				fmt.Print(textconstants.EnterTheNumber)
 				fmt.Scanf("%d", &userResponse)
@@ -258,6 +265,10 @@ func main() {
 					fmt.Print(textconstants.SquareSideLenightInput)
 					fmt.Print(textconstants.EnterTheNumber)
 					fmt.Scanf("%d", &squareSide)
+					if squareSide<2{
+						fmt.Println("Квадрат с стороной", squareSide, " построть невозвможно")
+						break
+					}
 					fmt.Print(textconstants.CoordinateFigureX)
 					fmt.Scanf("%d", &coordinateX)
 					fmt.Println(textconstants.CoordinateFigureY)
@@ -268,7 +279,7 @@ func main() {
 					}//Create()
 
 					showPole(&pole)//Вывод поля
-
+					fmt.Println(mapStructName)
 					GoToMainMenu=true
 				case 2: //Прямоугольник
 					rectangleName=""
@@ -319,21 +330,53 @@ func main() {
 				}
 			}
 
-		case 3:
-			fmt.Println(textconstants.DeleteFigureHeader)
+		case 3:// Удаление фигуры
+			figureName=""
+			fmt.Print(textconstants.DeleteFigureHeader)
 			fmt.Println(textconstants.NameFigure)
-			fmt.Print(textconstants.EnterTheNumber)
-			fmt.Scanf("%d", &userResponse)
-		case 4:
-			fmt.Println(textconstants.MoveFigureHeader)
+			fmt.Scanf("%s", &figureName)
+			if _,ok:=mapStructName[figureName]; !ok { //Проверка на существовынии указанной фтгуры
+				fmt.Println("Фигура с именем", figureName, " не существует")
+				continue
+			}
+			if err:=mapStructName[figureName].Delete(true);err!=nil{
+				fmt.Println(err)
+			}
+		case 4:// Перемещение фигуры
+			figureName=""
+			goTo=0
+			howFarToGo=0
+			fmt.Print(textconstants.MoveFigureHeader)
 			fmt.Println(textconstants.NameFigure)
+			fmt.Scanf("%s", &figureName)
+			if _,ok:=mapStructName[figureName]; !ok { //Проверка на существовынии указанной фтгуры
+				fmt.Println("Фигура с именем", figureName, " не существует")
+				continue
+			}
+
+			//вывод вариантов направления движения
+			fmt.Print(textconstants.MoveFigureDirection)
 			fmt.Print(textconstants.EnterTheNumber)
-			fmt.Scanf("%d", &userResponse)
+			fmt.Scanf("%d", &goTo)
+			fmt.Print(textconstants.MoveFigureValue)
+			fmt.Print(textconstants.EnterTheNumber)
+			fmt.Scanf("%d", &howFarToGo)
+			if err:=mapStructName[figureName].Move(goTo,howFarToGo); err!=nil{
+				fmt.Println(err)
+
+			}
+			showPole(&pole)
+
 		case 5:
-			fmt.Println(textconstants.TakeFigureCoordinate)
+			figureName=""
+			fmt.Print(textconstants.TakeFigureCoordinate)
 			fmt.Println(textconstants.NameFigure)
-			fmt.Print(textconstants.EnterTheNumber)
-			fmt.Scanf("%d", &userResponse)
+			fmt.Scanf("%s", &figureName)
+			if _,ok:=mapStructName[figureName]; !ok { //Проверка на существовынии указанной фтгуры
+				fmt.Println("Фигура с именем", figureName, " не существует")
+				continue
+			}
+			mapStructName[figureName].TakeKoordinate()
 		case 0:
 			fmt.Println(textconstants.GoodBay)
 			GoToExit = true

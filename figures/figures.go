@@ -21,7 +21,7 @@ type Painter interface {
 	//coordinateY - координата по Y
 	Paint(coordinateX, coordinateY int) error
 	// Метод удаления. Возвращаему ошибку взять на контроль (нужна ли она)
-	Delete() error
+	Delete(isFatalDelete bool) error
 	// Метод перемещения фигуры.
 	// Направления движения 1: Вверх
 	//						2: Вниз
@@ -39,6 +39,7 @@ type Square struct {
 	Pole        *[RazmernostPole][RazmernostPole]int
 	Coordinates [][2]int
 	SideSquare  int //Значение стороны квадрата. Получаем при создании
+	MapPainter map[string]Painter
 
 }
 
@@ -77,28 +78,28 @@ func (s *Square) Create(name string, mapPainter map[string]Painter, pole *[Razme
 			}
 		}
 	}
-	for _, v := range tempPole { //Вывод Нашего поля на экран
-		fmt.Println(v)
-	}
+
 	s.Name=name
 	s.SideSquare=args[0]
 	*s.Pole=tempPole
 	s.Coordinates=array
 	mapPainter[name]=s
+	s.MapPainter=mapPainter
+
 	return nil
 }
 
 
 //Метод отображения  фигуры квадрат с дыркой
 func (s *Square) Paint(coordinateX, coordinateY int) error {
+
+
 	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
 		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
 	}
-	tempPole := *s.Pole                       // Получение слепка Поля
-	cellCountInArray := s.SideSquare*4 - 4    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
-	array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
-	                  //Заполнение поля структуры инициализированным массивом координат
 
+	tempPole := *s.Pole                       // Получение слепка Поля
+	array := s.Coordinates    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
 	topLine := s.SideSquare + coordinateY     //Получаем длину верхней грани
 	lateralLine := s.SideSquare + coordinateX //Получаем длину боковой грани
 	if topLine < 0 || lateralLine < 0 || topLine > RazmernostPole || lateralLine > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
@@ -126,12 +127,16 @@ func (s *Square) Paint(coordinateX, coordinateY int) error {
 }
 
 // Удаление имеющегося квадрата с дыркой
-func (s *Square) Delete() error {
+func (s *Square) Delete(isFatalDelete bool) error {
+
 	tempPole := *s.Pole               // Получение слепка Поля
 	for _, v := range s.Coordinates { //Производим замену по координатам.
 		tempPole[v[0]][v[1]] = 0
 	}
 	*s.Pole = tempPole
+	if isFatalDelete {
+		delete(s.MapPainter,s.Name)
+	}
 	return nil
 }
 
@@ -144,7 +149,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 
 	switch goTo {
 	case 1: //Вверх
-		err := s.Delete()
+		err := s.Delete(false)
 		if err != nil {
 			return err
 		}
@@ -155,7 +160,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		}
 		return nil
 	case 2: //Вниз
-		err := s.Delete()
+		err := s.Delete(false)
 		if err != nil {
 			return err
 		}
@@ -165,7 +170,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		}
 		return nil
 	case 3: //Вправо
-		err := s.Delete()
+		err := s.Delete(false)
 		if err != nil {
 			return err
 		}
@@ -175,7 +180,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		}
 		return nil
 	case 4: //Влево
-		err := s.Delete()
+		err := s.Delete(false)
 		if err != nil {
 			return err
 		}
@@ -190,13 +195,15 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 }
 //Методы вывода координа квадраты с дыркой
 func (s *Square) TakeKoordinate () error {
-	for _,v := range s.Coordinates{
-		fmt.Println(v)
+	for k,v := range s.Coordinates{
+		fmt.Print(" ",k,"=",v)
 	}
+	fmt.Println("")
 	return nil
 }
-/*
+
 // Описание фигуры Прямоугольник.
+/*
 type Rectangle struct {
 	Name        string
 	Pole        *[RazmernostPole][RazmernostPole]int
@@ -204,7 +211,54 @@ type Rectangle struct {
 	Height      int //Значение ширины прямоугольника. Получаем при создании
 	Width       int //Значение высоты прямоугольника. Получаем при создании
 }
+//Метод создания фигуры Прямоугольник
+//args[0]: Высота прямоугольника.
+//args[1]: Ширина прямоугольника.
+//args[2]: Координата Х
+//args[3]: Координата Y
+// pole - указатель на используемое поле
+func (r *Rectangle) Create(name string, mapPainter map[string]Painter, pole *[RazmernostPole][RazmernostPole]int, args ...int) error{
+	if _,ok :=mapPainter[name]; ok {
+		return errors.New("Фигура с таким именем уже существует")
+	}
 
+	cellCountInArray := args[0]*4 - 4    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
+	array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
+	coordinateX:=args[1]
+	coordinateY:=args[2]
+	topLine := args[0]+ coordinateY     //Получаем длину верхней грани
+	lateralLine := args[0] + coordinateX //Получаем длину боковой грани
+	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		return errors.New("Выход начальных координат за пределы Поля") //Проверка на нахождение координат в пределах Поля
+	}
+	if topLine < 0 || lateralLine < 0 || topLine > RazmernostPole || lateralLine > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		return errors.New("Выход пустого квадрата  за пределы Поля") //Проверка на нахождение координат в пределах Поля
+	}
+	s.Pole=pole
+	tempPole := *s.Pole                       // Получение слепка Поля
+	inbexCoordinateArray := 0 //Идекс в массиве координат
+	for i := coordinateX; i < lateralLine; i++ {
+		for j := coordinateY; j < topLine; j++ {
+			if tempPole[i][j] != 0 {
+				return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
+			}
+			if i == coordinateX || i == lateralLine-1 || j == coordinateY || j == topLine-1 {
+				tempPole[i][j] = 1
+				array[inbexCoordinateArray][0] = i //Заполнение значений координат Х
+				array[inbexCoordinateArray][1] = j //Заполнение значений координат Y
+				inbexCoordinateArray++
+
+			}
+		}
+	}
+
+	s.Name=name
+	s.SideSquare=args[0]
+	*s.Pole=tempPole
+	s.Coordinates=array
+	mapPainter[name]=s
+	return nil
+}
 //Метод создания фигуры прямоугольник
 func (r *Rectangle) Paint(coordinateX, coordinateY int) error {
 	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
@@ -307,7 +361,7 @@ func (r *Rectangle) TakeKoordinate () error {
 	}
 	return nil
 }
-
+/*
 // Описание фигуры Змейка.
 type Snake struct {
 	Name        string

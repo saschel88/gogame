@@ -8,7 +8,7 @@ const (
 	MoveFigureValue   = "\nВведите требуемое количество ячеек для перемещения фигуры:"
 	MoveFigureDirection   = "\nВиберите направление движения:\n1. Вверх.\n2. Вниз. \n3. Вправо.\n4. Влево."
 	CreateFigureHeader 	= "\nСоздать фигуру:\n1. Пустой квадрат.\n2. Прямоугольник.\n3. Змейка.\n0. Перейти в главное меню"
-	DeleteFigureHeader 	= "\nУдалить фигурут:"
+	DeleteFigureHeader 	= "\nУдалить фигуру:"
 	MoveFigureHeader   = "\nПереместить фигуру:"
 	TakeFigureCoordinate = "\nПолучить координаты:"
 	SquareFigureHeader    = "\nПустой квадрат:"
