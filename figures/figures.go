@@ -3,17 +3,23 @@ package figures
 
 import (
 	"errors"
-	"container/list"
 	"fmt"
 )
 
 const RazmernostPole = 30 //размерность отображаемого поля
 // Интерфейс рописывающий дефтельность фигур на поле
 type Painter interface {
+
+	//Метод создания фигуры
+	//args[0]: Сторона квадрата, Высота прямоугольника, Длина змейки
+	//args[1]: Ширина прямоугольника, Координата Х
+	//args[2]:  Координата Y
+	// pole - указатель на используемое поле
+	Create(name string, mapPainter map[string]Painter, pole *[RazmernostPole][RazmernostPole]int, args ...int) error
 	// Координаты имеют вид array[X][Y]
 	//coordinateX - координата по X
 	//coordinateY - координата по Y
-	Create(coordinateX, coordinateY int) error
+	Paint(coordinateX, coordinateY int) error
 	// Метод удаления. Возвращаему ошибку взять на контроль (нужна ли она)
 	Delete() error
 	// Метод перемещения фигуры.
@@ -37,14 +43,61 @@ type Square struct {
 }
 
 //Метод создания фигуры квадрат с дыркой
-func (s *Square) Create(coordinateX, coordinateY int) error {
+func (s *Square) Create(name string, mapPainter map[string]Painter, pole *[RazmernostPole][RazmernostPole]int, args ...int) error{
+	if _,ok :=mapPainter[name]; ok {
+		return errors.New("Фигура с таким именем уже существует")
+	}
+
+	cellCountInArray := args[0]*4 - 4    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
+	array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
+	coordinateX:=args[1]
+	coordinateY:=args[2]
+	topLine := args[0]+ coordinateY     //Получаем длину верхней грани
+	lateralLine := args[0] + coordinateX //Получаем длину боковой грани
+	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		return errors.New("Выход начальных координат за пределы Поля") //Проверка на нахождение координат в пределах Поля
+	}
+	if topLine < 0 || lateralLine < 0 || topLine > RazmernostPole || lateralLine > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		return errors.New("Выход пустого квадрата  за пределы Поля") //Проверка на нахождение координат в пределах Поля
+	}
+	s.Pole=pole
+	tempPole := *s.Pole                       // Получение слепка Поля
+	inbexCoordinateArray := 0 //Идекс в массиве координат
+	for i := coordinateX; i < lateralLine; i++ {
+		for j := coordinateY; j < topLine; j++ {
+			if tempPole[i][j] != 0 {
+				return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
+			}
+			if i == coordinateX || i == lateralLine-1 || j == coordinateY || j == topLine-1 {
+				tempPole[i][j] = 1
+				array[inbexCoordinateArray][0] = i //Заполнение значений координат Х
+				array[inbexCoordinateArray][1] = j //Заполнение значений координат Y
+				inbexCoordinateArray++
+
+			}
+		}
+	}
+	for _, v := range tempPole { //Вывод Нашего поля на экран
+		fmt.Println(v)
+	}
+	s.Name=name
+	s.SideSquare=args[0]
+	*s.Pole=tempPole
+	s.Coordinates=array
+	mapPainter[name]=s
+	return nil
+}
+
+
+//Метод отображения  фигуры квадрат с дыркой
+func (s *Square) Paint(coordinateX, coordinateY int) error {
 	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
 		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
 	}
 	tempPole := *s.Pole                       // Получение слепка Поля
 	cellCountInArray := s.SideSquare*4 - 4    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
 	array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
-	s.Coordinates = array                     //Заполнение поля структуры инициализированным массивом координат
+	                  //Заполнение поля структуры инициализированным массивом координат
 
 	topLine := s.SideSquare + coordinateY     //Получаем длину верхней грани
 	lateralLine := s.SideSquare + coordinateX //Получаем длину боковой грани
@@ -60,14 +113,14 @@ func (s *Square) Create(coordinateX, coordinateY int) error {
 			}
 			if i == coordinateX || i == lateralLine-1 || j == coordinateY || j == topLine-1 {
 				tempPole[i][j] = 1
-				s.Coordinates[inbexCoordinateArray][0] = i //Заполнение значений координат Х
-				s.Coordinates[inbexCoordinateArray][1] = j //Заполнение значений координат Y
+				array[inbexCoordinateArray][0] = i //Заполнение значений координат Х
+				array[inbexCoordinateArray][1] = j //Заполнение значений координат Y
 				inbexCoordinateArray++
 
 			}
 		}
 	}
-
+	s.Coordinates = array
 	*s.Pole = tempPole
 	return nil
 }
@@ -96,7 +149,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 			return err
 		}
 
-		err = s.Create(s.Coordinates[0][0]-howFarToGo, s.Coordinates[0][1])
+		err = s.Paint(s.Coordinates[0][0]-howFarToGo, s.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
@@ -106,7 +159,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = s.Create(s.Coordinates[0][0]+howFarToGo, s.Coordinates[0][1])
+		err = s.Paint(s.Coordinates[0][0]+howFarToGo, s.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
@@ -116,7 +169,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = s.Create(s.Coordinates[0][0], s.Coordinates[0][1]+howFarToGo)
+		err = s.Paint(s.Coordinates[0][0], s.Coordinates[0][1]+howFarToGo)
 		if err != nil {
 			return err
 		}
@@ -126,7 +179,7 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = s.Create(s.Coordinates[0][0], s.Coordinates[0][1]-howFarToGo)
+		err = s.Paint(s.Coordinates[0][0], s.Coordinates[0][1]-howFarToGo)
 		if err != nil {
 			return err
 		}
@@ -142,6 +195,7 @@ func (s *Square) TakeKoordinate () error {
 	}
 	return nil
 }
+/*
 // Описание фигуры Прямоугольник.
 type Rectangle struct {
 	Name        string
@@ -152,7 +206,7 @@ type Rectangle struct {
 }
 
 //Метод создания фигуры прямоугольник
-func (r *Rectangle) Create(coordinateX, coordinateY int) error {
+func (r *Rectangle) Paint(coordinateX, coordinateY int) error {
 	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
 		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
 	}
@@ -207,7 +261,7 @@ func (r *Rectangle) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = r.Create(r.Coordinates[0][0]-howFarToGo, r.Coordinates[0][1])
+		err = r.Paint(r.Coordinates[0][0]-howFarToGo, r.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
@@ -217,7 +271,7 @@ func (r *Rectangle) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = r.Create(r.Coordinates[0][0]+howFarToGo, r.Coordinates[0][1])
+		err = r.Paint(r.Coordinates[0][0]+howFarToGo, r.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
@@ -227,7 +281,7 @@ func (r *Rectangle) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = r.Create(r.Coordinates[0][0], r.Coordinates[0][1]+howFarToGo)
+		err = r.Paint(r.Coordinates[0][0], r.Coordinates[0][1]+howFarToGo)
 		if err != nil {
 			return err
 		}
@@ -237,7 +291,7 @@ func (r *Rectangle) Move(goTo, howFarToGo int) error {
 		if err != nil {
 			return err
 		}
-		err = r.Create(r.Coordinates[0][0], r.Coordinates[0][1]-howFarToGo)
+		err = r.Paint(r.Coordinates[0][0], r.Coordinates[0][1]-howFarToGo)
 		if err != nil {
 			return err
 		}
@@ -263,7 +317,7 @@ type Snake struct {
 }
 
 //Метод создания фигуры Змейка
-func (s *Snake) Create(coordinateX, coordinateY int) error {
+func (s *Snake) Paint(coordinateX, coordinateY int) error {
 	if coordinateX < 0 || coordinateY < 0 || coordinateX > RazmernostPole || coordinateY > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
 		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
 	}
@@ -425,3 +479,4 @@ func (s *Snake) TakeKoordinate () error {
 	}
 	return nil
 }
+*/

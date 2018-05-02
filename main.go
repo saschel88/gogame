@@ -3,14 +3,20 @@ package main
 import (
 
 	"fmt"
-	"gogame/constants"
-	)
+	"homework/gogame/figures"
+	"homework/gogame/textconstants"
 
+)
 
+func showPole(pole *[figures.RazmernostPole][figures.RazmernostPole]int)  {
+	for _, v := range pole { //Вывод Нашего поля на экран
+		fmt.Println(v)
+	}
+}
 
 func main() {
-
-
+	mapStructName := make(map[string]figures.Painter) //карта
+	pole := [figures.RazmernostPole][figures.RazmernostPole]int{}
 /*	pole := [figures.RazmernostPole][figures.RazmernostPole]int{} //Наше поле
 	//имитация значений полученных от пользователя
 	//sideTop:=4
@@ -201,6 +207,25 @@ func main() {
 	GoToExit := false
 	//Ответ пользователя
 	var userResponse int
+	//Имя квадрата
+	squareName:=""
+	//Сторона квадрата
+	squareSide:=0
+	//Имя прямоугольника
+	rectangleName:=""
+
+	//Высота прямоугольника
+	rectangleHigh:=0
+	//Ширина прямоугольника
+	rectangleWidht:=0
+	//Имя Змейки
+	snakeName:=""
+	//Длина Змейки
+	snakeLengh:=0
+	//Координаты
+	coordinateX:=0
+	coordinateY:=0
+
 	// Цикл основной программы
 	for !GoToExit {
 		GoToExit=false
@@ -218,33 +243,80 @@ func main() {
 			for !GoToMainMenu {
 				GoToMainMenu = false
 				fmt.Println(textconstants.CreateFigureHeader)
-				fmt.Print(textconstants.NameFigure)
 				fmt.Print(textconstants.EnterTheNumber)
 				fmt.Scanf("%d", &userResponse)
-				/*switch userResponse {
+				coordinateY=0
+				coordinateX=0
+				switch userResponse {
 				case 1: //Пустой квадрат
-					for !goToPreviousMenu {
-						goToPreviousMenu = false
-						fmt.Println(SquareMenu)
-						fmt.Print(EnterTheNumber)
-						fmt.Scanf("%d", &userResponse)
+					squareName=""
+					fmt.Print(textconstants.SquareFigureHeader)
+					fmt.Print(textconstants.NameFigure)
+					fmt.Scanf("%s",&squareName)
 
-					}
+					// Проверка на наличие карты или Create()
+					fmt.Print(textconstants.SquareSideLenightInput)
+					fmt.Print(textconstants.EnterTheNumber)
+					fmt.Scanf("%d", &squareSide)
+					fmt.Print(textconstants.CoordinateFigureX)
+					fmt.Scanf("%d", &coordinateX)
+					fmt.Println(textconstants.CoordinateFigureY)
+					fmt.Scanf("%d", &coordinateY)
+					newSquare:=new(figures.Square)
+					if err:=newSquare.Create(squareName,mapStructName,&pole,squareSide,coordinateX,coordinateY);err!=nil{
+						fmt.Println(err)
+					}//Create()
+
+					showPole(&pole)//Вывод поля
+
+					GoToMainMenu=true
 				case 2: //Прямоугольник
-					fmt.Println(RectangleMenu)
-					fmt.Print(EnterTheNumber)
-					fmt.Scanf("%d", &userResponse)
+					rectangleName=""
+					fmt.Println(textconstants.RectangleFigureHeader)
+					fmt.Println(textconstants.NameFigure)
+					fmt.Scanf("%s",&rectangleName)
+					// Проверка на наличие карты или Create()
+					// Ввод высоты прямоугольника
+					fmt.Println(textconstants.RectangleHighLenightInput)
+					fmt.Println(textconstants.EnterTheNumber)
+					fmt.Scanf("%d", &rectangleHigh)
+					// Ввод Ширины прямоугольника
+					fmt.Println(textconstants.RectangleWidthLenightInput)
+					fmt.Println(textconstants.EnterTheNumber)
+					fmt.Scanf("%d", &rectangleWidht)
+					// Ввод координат
+					fmt.Println(textconstants.CoordinateFigureX)
+					fmt.Scanf("%d", &coordinateX)
+					fmt.Println(textconstants.CoordinateFigureY)
+					fmt.Scanf("%d", &coordinateY)
+					//Create()
+					//Вывод поля
 				case 3: //Змейка
-					fmt.Println(SnakeMenu)
-					fmt.Print(EnterTheNumber)
-					fmt.Scanf("%d", &userResponse)
+					snakeName=""
+					fmt.Println(textconstants.SnakeFigureHeader)
+					fmt.Println(textconstants.NameFigure)
+					fmt.Scanf("%s",&snakeName)
+					// Проверка на наличие карты или Create()
+					// Ввод длины Змейки
+					fmt.Println(textconstants.SnakeLenightInput)
+					fmt.Println(textconstants.EnterTheNumber)
+					fmt.Scanf("%d", &snakeLengh)
+					// Ввод координат
+					fmt.Println(textconstants.CoordinateFigureX)
+					fmt.Scanf("%d", &coordinateX)
+					fmt.Println(textconstants.CoordinateFigureY)
+					fmt.Scanf("%d", &coordinateY)
+					//Create()
+					//Вывод поля
+					GoToMainMenu=true
+
 				case 0: //Выход в Главное меню
 					GoToMainMenu = true
 
 				default: //Переход к меню Выбор типа фигур
-					fmt.Println(DefaultValue)
+					fmt.Println(textconstants.DefaultValue)
 					continue
-				}*/
+				}
 			}
 
 		case 3:
