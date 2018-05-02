@@ -279,46 +279,64 @@ func main() {
 					}//Create()
 
 					showPole(&pole)//Вывод поля
-					fmt.Println(mapStructName)
+
 					GoToMainMenu=true
 				case 2: //Прямоугольник
 					rectangleName=""
 					fmt.Println(textconstants.RectangleFigureHeader)
 					fmt.Println(textconstants.NameFigure)
 					fmt.Scanf("%s",&rectangleName)
-					// Проверка на наличие карты или Create()
+
 					// Ввод высоты прямоугольника
-					fmt.Println(textconstants.RectangleHighLenightInput)
+					fmt.Print(textconstants.RectangleHighLenightInput)
 					fmt.Println(textconstants.EnterTheNumber)
 					fmt.Scanf("%d", &rectangleHigh)
 					// Ввод Ширины прямоугольника
-					fmt.Println(textconstants.RectangleWidthLenightInput)
+					fmt.Print(textconstants.RectangleWidthLenightInput)
 					fmt.Println(textconstants.EnterTheNumber)
 					fmt.Scanf("%d", &rectangleWidht)
+					if (rectangleHigh<2 && rectangleWidht<2)||rectangleHigh<0||rectangleWidht<0{
+						fmt.Println("Данный прямоугольник построть невозвможно")
+						break
+					}
 					// Ввод координат
 					fmt.Println(textconstants.CoordinateFigureX)
 					fmt.Scanf("%d", &coordinateX)
 					fmt.Println(textconstants.CoordinateFigureY)
 					fmt.Scanf("%d", &coordinateY)
-					//Create()
+					newRectangle:=new(figures.Rectangle)
+					if err:=newRectangle.Create(rectangleName,mapStructName,&pole,rectangleHigh,rectangleWidht,coordinateX,coordinateY);err!=nil{
+						fmt.Println(err)
+					}
 					//Вывод поля
+					showPole(&pole)//Вывод поля
+
+					GoToMainMenu=true
 				case 3: //Змейка
 					snakeName=""
-					fmt.Println(textconstants.SnakeFigureHeader)
+					fmt.Print(textconstants.SnakeFigureHeader)
 					fmt.Println(textconstants.NameFigure)
 					fmt.Scanf("%s",&snakeName)
-					// Проверка на наличие карты или Create()
 					// Ввод длины Змейки
-					fmt.Println(textconstants.SnakeLenightInput)
+					fmt.Print(textconstants.SnakeLenightInput)
 					fmt.Println(textconstants.EnterTheNumber)
 					fmt.Scanf("%d", &snakeLengh)
+					if snakeLengh<0{
+						fmt.Println("Данную  Змейку невозвможно")
+						break
+					}
 					// Ввод координат
 					fmt.Println(textconstants.CoordinateFigureX)
 					fmt.Scanf("%d", &coordinateX)
 					fmt.Println(textconstants.CoordinateFigureY)
 					fmt.Scanf("%d", &coordinateY)
-					//Create()
+					newSnake:=new(figures.Snake)
+					if err:=newSnake.Create(snakeName,mapStructName,&pole,snakeLengh,coordinateX,coordinateY);err!=nil{
+						fmt.Println(err)
+					}
 					//Вывод поля
+					showPole(&pole)//Вывод поля
+
 					GoToMainMenu=true
 
 				case 0: //Выход в Главное меню
