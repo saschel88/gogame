@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"container/list"
+	"github.com/astaxie/beego/logs"
 )
 
 const RazmernostPole = 30 //размерность отображаемого поля
@@ -122,6 +123,10 @@ func (s *Square) Paint(coordinateX, coordinateY int) error {
 			}
 		}
 	}
+	err := s.Delete(false)
+	if err != nil {
+		return err
+	}
 	s.Coordinates = array
 	*s.Pole = tempPole
 	return nil
@@ -150,42 +155,25 @@ func (s *Square) Move(goTo, howFarToGo int) error {
 
 	switch goTo {
 	case 1: //Вверх
-		err := s.Delete(false)
-		if err != nil {
-			return err
-		}
-
-		err = s.Paint(s.Coordinates[0][0]-howFarToGo, s.Coordinates[0][1])
+		err := s.Paint(s.Coordinates[0][0]-howFarToGo, s.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
 		return nil
 	case 2: //Вниз
-		err := s.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = s.Paint(s.Coordinates[0][0]+howFarToGo, s.Coordinates[0][1])
+		err := s.Paint(s.Coordinates[0][0]+howFarToGo, s.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
 		return nil
 	case 3: //Вправо
-		err := s.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = s.Paint(s.Coordinates[0][0], s.Coordinates[0][1]+howFarToGo)
+		err := s.Paint(s.Coordinates[0][0], s.Coordinates[0][1]+howFarToGo)
 		if err != nil {
 			return err
 		}
 		return nil
 	case 4: //Влево
-		err := s.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = s.Paint(s.Coordinates[0][0], s.Coordinates[0][1]-howFarToGo)
+		err := s.Paint(s.Coordinates[0][0], s.Coordinates[0][1]-howFarToGo)
 		if err != nil {
 			return err
 		}
@@ -225,7 +213,7 @@ func (r *Rectangle) Create(name string, mapPainter map[string]Painter, pole *[Ra
 		return errors.New("Фигура с таким именем уже существует")
 	}
 
-	cellCountInArray := args[0]*args[0]    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
+	cellCountInArray := args[0]*args[1]    //Подсчет количества ячеек в массиве координатов для квадрата с дыркой
 	array := make([][2]int, cellCountInArray) // Инициализация слайса  массивов координат
 	coordinateX:=args[2]
 	coordinateY:=args[3]
@@ -240,18 +228,17 @@ func (r *Rectangle) Create(name string, mapPainter map[string]Painter, pole *[Ra
 	r.Pole=pole
 	tempPole := *r.Pole                       // Получение слепка Поля
 	inbexCoordinateArray := 0 //Идекс в массиве координат
+
 	for i := coordinateX; i < lateralLine; i++ {
 		for j := coordinateY; j < topLine; j++ {
 			if tempPole[i][j] != 0 {
 				return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
 			}
-			if i == coordinateX || i == lateralLine-1 || j == coordinateY || j == topLine-1 {
 				tempPole[i][j] = 1
 				array[inbexCoordinateArray][0] = i //Заполнение значений координат Х
 				array[inbexCoordinateArray][1] = j //Заполнение значений координат Y
 				inbexCoordinateArray++
 
-			}
 		}
 	}
 
@@ -279,6 +266,8 @@ func (r *Rectangle) Paint(coordinateX, coordinateY int) error {
 	topLine := r.Height + coordinateY         //Получаем длину верхней грани
 	lateralLine := r.Width + coordinateX      //Получаем длину боковой грани
 	if topLine < 0 || lateralLine < 0 || topLine > RazmernostPole || lateralLine > RazmernostPole { //Проверка на принадлежность координат первой ячейки нашему Полю
+		logs.Info(topLine)
+		logs.Warning(lateralLine)
 		return errors.New("Выход за пределы Поля") //Проверка на нахождение координат в пределах Поля
 	}
 	// Проверка на наличие препядствий, мешающих построить прямоугольник , рисование квадрата с дыркой на Поле и запись координат в контейнер координат
@@ -288,14 +277,18 @@ func (r *Rectangle) Paint(coordinateX, coordinateY int) error {
 			if tempPole[i][j] != 0 {
 				return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
 			}
-			if i == coordinateX || i == lateralLine-1 || j == coordinateY || j == topLine-1 {
+
 				tempPole[i][j] = 1
 				array[inbexCoordinateArray][0] = i //Заполнение значений координат Х
 				array[inbexCoordinateArray][1] = j //Заполнение значений координат Y
 				inbexCoordinateArray++
 
-			}
+
 		}
+	}
+	err := r.Delete(false)
+	if err != nil {
+		return err
 	}
 	r.Coordinates = array
 	*r.Pole = tempPole
@@ -326,41 +319,27 @@ func (r *Rectangle) Move(goTo, howFarToGo int) error {
 
 	switch goTo {
 	case 1: //Вверх
-		err := r.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = r.Paint(r.Coordinates[0][0]-howFarToGo, r.Coordinates[0][1])
+
+		err := r.Paint(r.Coordinates[0][0]-howFarToGo, r.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
 		return nil
 	case 2: //Вниз
-		err := r.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = r.Paint(r.Coordinates[0][0]+howFarToGo, r.Coordinates[0][1])
+
+		err := r.Paint(r.Coordinates[0][0]+howFarToGo, r.Coordinates[0][1])
 		if err != nil {
 			return err
 		}
 		return nil
 	case 3: //Вправо
-		err := r.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = r.Paint(r.Coordinates[0][0], r.Coordinates[0][1]+howFarToGo)
+		err := r.Paint(r.Coordinates[0][0], r.Coordinates[0][1]+howFarToGo)
 		if err != nil {
 			return err
 		}
 		return nil
 	case 4: //Влево
-		err := r.Delete(false)
-		if err != nil {
-			return err
-		}
-		err = r.Paint(r.Coordinates[0][0], r.Coordinates[0][1]-howFarToGo)
+		err := r.Paint(r.Coordinates[0][0], r.Coordinates[0][1]-howFarToGo)
 		if err != nil {
 			return err
 		}
@@ -439,7 +418,9 @@ func (s *Snake) Paint(coordinateX, coordinateY int) error {
 
 	lenihtSnakeLine := s.SnakeLength + coordinateY //Получаем длину Змейки с учетом расположения на Поле
 	// Проверка на наличие препядствий, мешающих построить Змейку , рисование змейки и запись координат в контейнер координа
-
+	if lenihtSnakeLine < 0 || lenihtSnakeLine > RazmernostPole { //Проверка на принадлежность змейки нашему Полю
+		return errors.New("Выход Змейки за пределы Поля")
+	}
 	for i := coordinateY; i < lenihtSnakeLine; i++ {
 		if tempPole[coordinateX][i] != 0 {
 			return errors.New("По данным координатам фигуру построить невозможно, есть препядствия")
@@ -487,7 +468,7 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 	tempArrayLast:=[2]int{}
 	switch goTo {
 	case 1: //Вверх
-		if coordinateX-howFarToGo<0 {
+		if coordinateX-howFarToGo<=0 {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
 		for i:=coordinateX-1;i>coordinateX-howFarToGo-1 ;i--  {// Проверка на препятствие
@@ -507,7 +488,7 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		s.Coordinates=snakeList
 		return nil
 	case 2: //Вниз
-		if coordinateX+howFarToGo>RazmernostPole {
+		if coordinateX+howFarToGo>=RazmernostPole {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
 		for i:=coordinateX+1;i<coordinateX+howFarToGo+1 ;i++  {// Проверка на препятствие
@@ -527,7 +508,9 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 		return nil
 
 	case 3: //Вправо
-		if coordinateY+howFarToGo>RazmernostPole {
+		logs.Info(coordinateY+howFarToGo)
+		if coordinateY+howFarToGo>=RazmernostPole {
+			logs.Info(coordinateY+howFarToGo)
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
 		for i:=coordinateY+1;i<coordinateY+howFarToGo+1 ;i++  {// Проверка на препятствие
@@ -548,7 +531,7 @@ func (s *Snake) Move(goTo, howFarToGo int) error {
 
 	case 4: //Влево
 
-		if coordinateY-howFarToGo<0 {
+		if coordinateY-howFarToGo<=0 {
 			return errors.New("Движение невозможно, достигнута граница поля")
 		}
 
